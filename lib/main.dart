@@ -246,25 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(height: 24.0),
               ElevatedButton(
                 onPressed: () async {
-                  print("onPressed Start Tutoring");
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => EmotionWordsScreen(
-                            nativeLanguageCode: _getLanguageCode(
-                              _selectedNativeLanguage!,
-                            ),
-                          ),
-                    ),
-                  );
-                },
-                child: const Text('Start Learning'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  print("onPressed Check");
                   // Get topic name from selected vocabulary
                   final selectedVocabulary =
                       _vocabularies.firstWhere(
@@ -316,8 +298,19 @@ class _MyHomePageState extends State<MyHomePage> {
                       print('Failed to parse or insert vocabulary data: $e');
                     }
                   }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => EmotionWordsScreen(
+                            nativeLanguageCode: _getLanguageCode(
+                              _selectedNativeLanguage!,
+                            ),
+                          ),
+                    ),
+                  );
                 },
-                child: const Text('Check'),
+                child: const Text('Start Learning'),
               ),
             ],
           ),
