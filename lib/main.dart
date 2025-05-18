@@ -105,6 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     _loadVocabularies();
+    _selectedLearnLanguage = _learnLanguages.isNotEmpty ? _learnLanguages.first : null;
+    _selectedNativeLanguage = _nativeLanguages.isNotEmpty ? _nativeLanguages.first : null;
     super.initState();
   }
 
@@ -309,33 +311,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         }
                       }
                       // After inserting, navigate to the next screen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => EmotionWordsScreen(
-                                nativeLanguageCode: languageCode,
-                              ),
-                        ),
-                      );
+                      print("Successfully inserted vocabulary data");
                     } catch (e) {
                       print('Failed to parse or insert vocabulary data: $e');
                     }
                   }
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => EmotionWordsScreen(
-                            nativeLanguageCode: _getLanguageCode(
-                              _selectedNativeLanguage!,
-                            ),
-                          ),
-                    ),
-                  );
                 },
-                child: const Text('Start Tutoring'),
+                child: const Text('Check'),
               ),
             ],
           ),

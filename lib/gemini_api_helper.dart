@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const String GEMINI_API_KEY = String.fromEnvironment('GEMINI_API_KYE', defaultValue: 'AIzaSyB7oTSTwJDAQZe5JzP2oosfO8rPrsgCo5I');
-const String apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const String GEMINI_API_KEY = String.fromEnvironment('GEMINI_API_KYE', defaultValue: 'AIzaSyATFZfhzaC9kBJcLqRk1WGA4PNxtWEsE5Y');
+const String apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
   // JSON schema for the expected response
   final String jsonSchema = '''
   {
