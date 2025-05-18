@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screen2_words_list.dart';
 
 void main() {
   runApp(const MyApp());
@@ -173,7 +174,10 @@ class MyHomePage extends StatefulWidget {
                 const SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
-                    // Add action for starting tutoring
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EmotionWordsScreen()),
+                    );
                   },
                   child: const Text('Start Tutoring'),
                 ),

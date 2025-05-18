@@ -1,0 +1,30 @@
+{
+    "project_info": {
+      "project_number": "577070733491",
+      "project_id": "langpocket-8ffff",
+      "storage_bucket": "langpocket-8ffff.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:577070733491:android:c85e0e1ef503fbe52c38c6",
+          "android_client_info": {
+            "package_name": "com.artemreva79.langpocket"
+          }
+        },
+        "oauth_client": [],
+        "api_key": [
+          {
+            "current_key": "AIzaSyD7ZrPmByAkjerQE--k1m9sOKXpY6YiDY8"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": []
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }
+  
