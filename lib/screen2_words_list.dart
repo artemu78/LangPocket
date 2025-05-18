@@ -1,13 +1,93 @@
 import 'package:flutter/material.dart';
-class EmotionWordsScreen extends StatelessWidget {
-  const EmotionWordsScreen({super.key});
-  
-  final List<Map<String, String>> emotionWords = const [
-    {'english': 'Happy', 'translation': 'Счастливый (Schastlivyy)'},
-    {'english': 'Sad', 'translation': 'Грустный (Grustnyy)'},
-    {'english': 'Angry', 'translation': 'Сердитый (Serdityy)'},
-    {'english': 'Excited', 'translation': 'Взволнованный (Vzvolnovannyy)'},
-    {'english': 'Scared', 'translation': 'Испуганный (Ispugannyy)'},
+class EmotionWordsScreen extends StatefulWidget {
+  const EmotionWordsScreen({super.key, required this.nativeLanguageCode});
+
+  final String nativeLanguageCode;
+  @override
+  _EmotionWordsScreenState createState() => _EmotionWordsScreenState();
+}
+
+class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
+
+  final Map<String, Map<String, String>> translations = const {
+  'tr': {
+    'Happy': 'Mutlu',
+    'Sad': 'Üzgün',
+    'Angry': 'Kızgın',
+    'Excited': 'Heyecanlı',
+    'Scared': 'Korkmuş',
+  },
+  'zh': {
+    'Happy': '高兴 (Gāoxìng)',
+    'Sad': '伤心 (Shāngxīn)',
+    'Angry': '生气 (Shēngqì)',
+    'Excited': '兴奋 (Xīngfèn)',
+    'Scared': '害怕 (Hàipà)',
+  },
+  'es': {
+    'Happy': 'Feliz',
+    'Sad': 'Triste',
+    'Angry': 'Enojado',
+    'Excited': 'Emocionado',
+    'Scared': 'Asustado',
+  },
+  'hi': {
+    'Happy': 'खुश (Khush)',
+    'Sad': 'दुखी (Dukhi)',
+    'Angry': 'गुस्सा (Gussa)',
+    'Excited': 'उत्साहित (Utsāhit)',
+    'Scared': 'डरा हुआ (Darā Huā)',
+  },
+  'ar': {
+    'Happy': 'سعيد (Saʿīd)',
+    'Sad': 'حزين (Ḥazīn)',
+    'Angry': 'غاضب (Ghāḍib)',
+    'Excited': 'متحمس (Mutḥammis)',
+    'Scared': 'خائف (Khāʾif)',
+  },
+  'pt': {
+    'Happy': 'Feliz',
+    'Sad': 'Triste',
+    'Angry': 'Zangado',
+    'Excited': 'Animado',
+    'Scared': 'Assustado',
+  },
+  'bn': {
+    'Happy': 'খুশি (Khushi)',
+    'Sad': 'দুঃখিত (Dukkhito)',
+    'Angry': 'রাগান্বিত (Rāgānvita)',
+    'Excited': 'উদ্দীপ্ত (Uddīpta)',
+    'Scared': 'ভীত (Bhīta)',
+  },
+  'ru': {
+    'Happy': 'Счастливый (Schastlivyy)',
+    'Sad': 'Грустный (Grustnyy)',
+    'Angry': 'Злой (Zloy)',
+    'Excited': 'Взволнованный (Vzvolnovannyy)',
+    'Scared': 'Испуганный (Ispugannyy)',
+  },
+  'ja': {
+    'Happy': '嬉しい (Ureshii)',
+    'Sad': '悲しい (Kanashii)',
+    'Angry': '怒っている (Okotteiru)',
+    'Excited': '興奮している (Kōfun shite iru)',
+    'Scared': '怖い (Kowai)',
+  },
+  'pa': {
+    'Happy': 'ਖੁਸ਼ (Khush)',
+    'Sad': 'ਉਦਾਸ (Udās)',
+    'Angry': 'ਗੁੱਸੇ ਵਿਚ (Gusse vich)',
+    'Excited': 'ਉਤਸ਼ਾਹਤ (Utshāhit)',
+    'Scared': 'ਡਰਿਆ ਹੋਇਆ (Ḍariā hoia)',
+  },
+};
+
+  final List<String> emotionWords = const [
+    'Happy',
+    'Sad',
+    'Angry',
+    'Excited',
+    'Scared',
   ];
 
   @override
@@ -25,13 +105,20 @@ class EmotionWordsScreen extends StatelessWidget {
               child: ListView.builder(
                 itemCount: emotionWords.length,
                 itemBuilder: (context, index) {
-                  final word = emotionWords[index];
+                  final englishWord = emotionWords[index];
+                  final translatedWord = translations[widget.nativeLanguageCode]?[englishWord] ??
+                      'Translation not available';
+                  final word = {
+                    'english': englishWord,
+                    'translation': translatedWord,
+                  };
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 4.0),
                     elevation: 2.0,
                     child: ListTile(
                       title: Text(
-                        word['english']!,
+                        englishWord,
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(

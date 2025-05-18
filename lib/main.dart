@@ -55,19 +55,87 @@ class MyHomePage extends StatefulWidget {
   String? _selectedNativeLanguage;
   double _level = 0.0;
 
+  // Add translations for other languages here
+  final Map<String, Map<String, String>> _translations = {
+    'en': {
+      'learn_language': 'Language you are going to learn',
+      'native_language': 'Your native language',
+      'level': 'Level',
+      'start_tutoring': 'Start Tutoring',
+      'app_title': 'LangPocket - pocket language tutor',
+    },
+    'zh': {
+      'learn_language': '您将要学习的语言',
+      'native_language': '您的母语',
+      'level': '级别',
+      'start_tutoring': '开始辅导',
+      'app_title': 'LangPocket - 口袋语言导师',
+    },
+    'es': {
+      'learn_language': 'Idioma que vas a aprender',
+      'native_language': 'Tu idioma nativo',
+      'level': 'Nivel',
+      'start_tutoring': 'Empezar a enseñar',
+      'app_title': 'LangPocket - tutor de idiomas de bolsillo',
+    },
+    'hi': {
+      'learn_language': 'जिस भाषा को आप सीखने जा रहे हैं',
+      'native_language': 'आपकी मातृभाषा',
+      'level': 'स्तर',
+      'start_tutoring': 'शिक्षण शुरू करें',
+      'app_title': 'LangPocket - पॉकेट भाषा ट्यूटर',
+    },
+    'ar': {
+      'learn_language': 'اللغة التي ستتعلمها',
+      'native_language': 'لغتك الأم',
+      'level': 'المستوى',
+      'start_tutoring': 'ابدأ التدريس',
+      'app_title': 'LangPocket - مدرس لغة الجيب',
+    },
+    'ru': {'learn_language': '', 'native_language': '', 'level': '', 'start_tutoring': '', 'app_title': ''}, // Russian
+    'ja': {'learn_language': '', 'native_language': '', 'level': '', 'start_tutoring': '', 'app_title': ''}, // Japanese
+    'pa': {'learn_language': '', 'native_language': '', 'level': '', 'start_tutoring': '', 'app_title': ''}, // Punjabi
+    // Add translations for other languages here
+  };
+
   final List<String> _learnLanguages = ['English'];
   final List<String> _nativeLanguages = [
     'Mandarin Chinese (普通话)',
     'Spanish (Español)',
-    'English',
+    'Turkish',
     'Hindi (हिन्दी)',
     'Arabic (العربية)',
     'Portuguese (Português)',
-    'Bengali (বাংলা)',
     'Russian (Русский)',
     'Japanese (日本語)',
     'Punjabi (ਪੰਜਾਬੀ)'
   ];
+
+  String _getLanguageCode(String languageName) {
+    switch (languageName) {
+      case 'Mandarin Chinese (普通话)':
+        return 'zh';
+      case 'Spanish (Español)':
+        return 'es';
+      case 'Turkish':
+        return 'tr';
+      case 'Hindi (हिन्दी)':
+        return 'hi';
+      case 'Arabic (العربية)':
+        return 'ar';
+      case 'Portuguese (Português)':
+        return 'pt';
+      // Add cases for other languages
+ case 'Russian (Русский)':
+ return 'ru';
+ case 'Japanese (日本語)':
+ return 'ja';
+ case 'Punjabi (ਪੰਜਾਬੀ)':
+ return 'pa';
+      default:
+        return 'en'; // Default to English
+    }
+  }
 
   @override
   void initState() {
@@ -176,8 +244,8 @@ class MyHomePage extends StatefulWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => EmotionWordsScreen()),
-                    );
+                      MaterialPageRoute(builder: (context) => EmotionWordsScreen(nativeLanguageCode: _getLanguageCode(_selectedNativeLanguage!))),
+                   );
                   },
                   child: const Text('Start Tutoring'),
                 ),
