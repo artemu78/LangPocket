@@ -31,15 +31,41 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // Create the Vocabulary table
+    await db.execute('''
+      CREATE TABLE Vocabulary (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT NOT NULL UNIQUE
+      )
+    ''');
+
+    // Pre-fill the Vocabulary table
+    await db.execute('INSERT INTO Vocabulary (Name) VALUES ("Emotions")');
+    await db.execute('INSERT INTO Vocabulary (Name) VALUES ("Shopping")');
+    await db.execute('INSERT INTO Vocabulary (Name) VALUES ("Small talk")');
+    await db.execute('INSERT INTO Vocabulary (Name) VALUES ("Travel")');
+    await db.execute('INSERT INTO Vocabulary (Name) VALUES ("City")');
+
+    // Create the Translations table with a foreign key and index
     await db.execute('''
       CREATE TABLE Translations(
-        vocabulary TEXT NOT NULL,
+        vocabulary INTEGER NOT NULL,
         original_word TEXT NOT NULL,
         origin_lang TEXT NOT NULL,
         transl_word TEXT NOT NULL,
         transl_code TEXT NOT NULL,
-        learned INTEGER
+        learned INTEGER,
+        FOREIGN KEY (vocabulary) REFERENCES Vocabulary(id)
       )
     ''');
+    await db.execute('CREATE INDEX idx_translations_vocabulary ON Translations(vocabulary)'); // Index on vocabulary (now INTEGER ID)
+  }
+
+  Future<List<Map<String, dynamic>>> getVocabularies() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('Vocabulary', columns: ['Name', 'id']);
+    return List.generate(maps.length, (i) {
+      return {'id': maps[i]['id'] as int, 'Name': maps[i]['Name'] as String};
+    });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screen2_words_list.dart';
 
+import 'database_helper.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -54,49 +55,7 @@ class MyHomePage extends StatefulWidget {
   String? _selectedLearnLanguage;
   String? _selectedNativeLanguage;
   double _level = 0.0;
-
-  // Add translations for other languages here
-  final Map<String, Map<String, String>> _translations = {
-    'en': {
-      'learn_language': 'Language you are going to learn',
-      'native_language': 'Your native language',
-      'level': 'Level',
-      'start_tutoring': 'Start Tutoring',
-      'app_title': 'LangPocket - pocket language tutor',
-    },
-    'zh': {
-      'learn_language': '您将要学习的语言',
-      'native_language': '您的母语',
-      'level': '级别',
-      'start_tutoring': '开始辅导',
-      'app_title': 'LangPocket - 口袋语言导师',
-    },
-    'es': {
-      'learn_language': 'Idioma que vas a aprender',
-      'native_language': 'Tu idioma nativo',
-      'level': 'Nivel',
-      'start_tutoring': 'Empezar a enseñar',
-      'app_title': 'LangPocket - tutor de idiomas de bolsillo',
-    },
-    'hi': {
-      'learn_language': 'जिस भाषा को आप सीखने जा रहे हैं',
-      'native_language': 'आपकी मातृभाषा',
-      'level': 'स्तर',
-      'start_tutoring': 'शिक्षण शुरू करें',
-      'app_title': 'LangPocket - पॉकेट भाषा ट्यूटर',
-    },
-    'ar': {
-      'learn_language': 'اللغة التي ستتعلمها',
-      'native_language': 'لغتك الأم',
-      'level': 'المستوى',
-      'start_tutoring': 'ابدأ التدريس',
-      'app_title': 'LangPocket - مدرس لغة الجيب',
-    },
-    'ru': {'learn_language': '', 'native_language': '', 'level': '', 'start_tutoring': '', 'app_title': ''}, // Russian
-    'ja': {'learn_language': '', 'native_language': '', 'level': '', 'start_tutoring': '', 'app_title': ''}, // Japanese
-    'pa': {'learn_language': '', 'native_language': '', 'level': '', 'start_tutoring': '', 'app_title': ''}, // Punjabi
-    // Add translations for other languages here
-  };
+  int? _selectedVocabulary;
 
   final List<String> _learnLanguages = ['English'];
   final List<String> _nativeLanguages = [
@@ -111,6 +70,7 @@ class MyHomePage extends StatefulWidget {
     'Punjabi (ਪੰਜਾਬੀ)'
   ];
 
+  List<Map<String, dynamic>> _vocabularies = [];
   String _getLanguageCode(String languageName) {
     switch (languageName) {
       case 'Mandarin Chinese (普通话)':
@@ -139,9 +99,17 @@ class MyHomePage extends StatefulWidget {
 
   @override
   void initState() {
+    _loadVocabularies();
     super.initState();
-    _selectedLearnLanguage = _learnLanguages.first;
-    _selectedNativeLanguage = _nativeLanguages.first;
+  }
+  Future<void> _loadVocabularies() async {
+    final vocabularies = await DatabaseHelper().getVocabularies();
+    setState(() {
+      _vocabularies = vocabularies;
+      if (_vocabularies.isNotEmpty) {
+        _selectedVocabulary = _vocabularies.first['id'];
+      }
+    });
   }
 
   void _onLevelChanged(double value) {
@@ -192,6 +160,27 @@ class MyHomePage extends StatefulWidget {
                       child: Text(value),
                     );
                   }).toList(),
+                ),
+                const SizedBox(height: 24.0),
+                const Text(
+                  'Select Vocabulary',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                DropdownButton<int>(
+                  value: _selectedVocabulary,
+                  onChanged: (int? newValue) {
+                    setState(() {
+                      _selectedVocabulary = newValue;
+                    });
+                  },
+                  items: _vocabularies
+                      .map<DropdownMenuItem<int>>((Map<String, dynamic> vocabulary) {
+                    return DropdownMenuItem<int>(
+                      value: vocabulary['id'],
+                      child: Text(vocabulary['Name'] ?? 'empty'),
+);
+                  }).toList()
                 ),
                 const SizedBox(height: 24.0),
                 const Text(
