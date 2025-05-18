@@ -26,9 +26,7 @@ class MyApp extends StatelessWidget {
         // state is not lost during the reload. To reset the state, use hot
         // restart instead.
         //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -51,19 +49,35 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
-}
+}class _MyHomePageState extends State<MyHomePage> {
+  String? _selectedLearnLanguage;
+  String? _selectedNativeLanguage;
+  double _level = 0.0;
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final List<String> _learnLanguages = ['English'];
+  final List<String> _nativeLanguages = [
+    'Mandarin Chinese (普通话)',
+    'Spanish (Español)',
+    'English',
+    'Hindi (हिन्दी)',
+    'Arabic (العربية)',
+    'Portuguese (Português)',
+    'Bengali (বাংলা)',
+    'Russian (Русский)',
+    'Japanese (日本語)',
+    'Punjabi (ਪੰਜਾਬੀ)'
+  ];
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    super.initState();
+    _selectedLearnLanguage = _learnLanguages.first;
+    _selectedNativeLanguage = _nativeLanguages.first;
+  }
+
+  void _onLevelChanged(double value) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _level = value;
     });
   }
 
@@ -82,41 +96,91 @@ class _MyHomePageState extends State<MyHomePage> {
         // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        // the App.build method, and use it to set our appbar title.title: const Text('LangPocket - pocket language tutor'),
+        title: const Text('LangPocket - pocket language tutor'),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: <Widget>[
+                const Text(
+                  'Language you are going to learn',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                DropdownButton<String>(
+                  value: _selectedLearnLanguage,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedLearnLanguage = newValue;
+                    });
+                  },
+                  items: _learnLanguages
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24.0),
+                const Text(
+                  'Your native language',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                DropdownButton<String>(
+                  value: _selectedNativeLanguage,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedNativeLanguage = newValue;
+                    });
+                  },
+                  items: _nativeLanguages
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24.0),
+                const Text(
+                  'Level',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                Slider(
+                  value: _level,
+                  min: 0.0,
+                  max: 5.0,
+                  divisions: 5,
+                  label: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'][_level.round()],
+                  onChanged: _onLevelChanged,
+                ),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text('A1'),
+                    Text('A2'),
+                    Text('B1'),
+                    Text('B2'),
+                    Text('C1'),
+                    Text('C2'),
+                  ],
+                ),
+                const SizedBox(height: 24.0),
+                ElevatedButton(
+                  onPressed: () {
+                    // Add action for starting tutoring
+                  },
+                  child: const Text('Start Tutoring'),
+                ),
+              ],
             ),
-          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
