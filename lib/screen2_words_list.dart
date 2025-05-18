@@ -4,6 +4,7 @@ class EmotionWordsScreen extends StatefulWidget {
 
   final String nativeLanguageCode;
   @override
+  // ignore: library_private_types_in_public_api
   _EmotionWordsScreenState createState() => _EmotionWordsScreenState();
 }
 

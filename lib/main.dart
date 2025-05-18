@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screen2_words_list.dart';
-
+import 'dart:convert';
 import 'database_helper.dart';
+import 'gemini_api_helper.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -51,7 +53,9 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
-}class _MyHomePageState extends State<MyHomePage> {
+}
+
+class _MyHomePageState extends State<MyHomePage> {
   String? _selectedLearnLanguage;
   String? _selectedNativeLanguage;
   double _level = 0.0;
@@ -68,7 +72,7 @@ class MyHomePage extends StatefulWidget {
     'Portuguese (Português)',
     'Russian (Русский)',
     'Japanese (日本語)',
-    'Punjabi (ਪੰਜਾਬੀ)'
+    'Punjabi (ਪੰਜਾਬੀ)',
   ];
 
   List<Map<String, dynamic>> _vocabularies = [];
@@ -87,12 +91,12 @@ class MyHomePage extends StatefulWidget {
       case 'Portuguese (Português)':
         return 'pt';
       // Add cases for other languages
- case 'Russian (Русский)':
- return 'ru';
- case 'Japanese (日本語)':
- return 'ja';
- case 'Punjabi (ਪੰਜਾਬੀ)':
- return 'pa';
+      case 'Russian (Русский)':
+        return 'ru';
+      case 'Japanese (日本語)':
+        return 'ja';
+      case 'Punjabi (ਪੰਜਾਬੀ)':
+        return 'pa';
       default:
         return 'en'; // Default to English
     }
@@ -103,6 +107,7 @@ class MyHomePage extends StatefulWidget {
     _loadVocabularies();
     super.initState();
   }
+
   Future<void> _loadVocabularies() async {
     final vocabularies = await DatabaseHelper().getVocabularies();
     setState(() {
@@ -143,105 +148,197 @@ class MyHomePage extends StatefulWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[
-                const Text(
-                  'Language you are going to learn',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8.0),
-                DropdownButton<String>(
-                  value: _selectedLearnLanguage,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedLearnLanguage = newValue;
-                    });
-                  },
-                  items: _learnLanguages
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
+              const Text(
+                'Language you are going to learn',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              DropdownButton<String>(
+                value: _selectedLearnLanguage,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedLearnLanguage = newValue;
+                  });
+                },
+                items:
+                    _learnLanguages.map<DropdownMenuItem<String>>((
+                      String value,
+                    ) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+              ),
+              const SizedBox(height: 24.0),
+              const Text(
+                'Select Vocabulary',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              DropdownButton<int>(
+                value: _selectedVocabulary,
+                onChanged: (int? newValue) {
+                  setState(() {
+                    _selectedVocabulary = newValue;
+                  });
+                },
+                items:
+                    _vocabularies.map<DropdownMenuItem<int>>((
+                      Map<String, dynamic> vocabulary,
+                    ) {
+                      return DropdownMenuItem<int>(
+                        value: vocabulary['id'],
+                        child: Text(vocabulary['Name'] ?? 'empty'),
+                      );
+                    }).toList(),
+              ),
+              const SizedBox(height: 24.0),
+              const Text(
+                'Your native language',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              DropdownButton<String>(
+                value: _selectedNativeLanguage,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedNativeLanguage = newValue;
+                  });
+                },
+                items:
+                    _nativeLanguages.map<DropdownMenuItem<String>>((
+                      String value,
+                    ) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+              ),
+              const SizedBox(height: 24.0),
+              const Text(
+                'Level',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              Slider(
+                value: _level,
+                min: 0.0,
+                max: 5.0,
+                divisions: 5,
+                label: _levelString,
+                onChanged: _onLevelChanged,
+              ),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('A1'),
+                  Text('A2'),
+                  Text('B1'),
+                  Text('B2'),
+                  Text('C1'),
+                  Text('C2'),
+                ],
+              ),
+              const SizedBox(height: 24.0),
+              ElevatedButton(
+                onPressed: () async {
+                  print("onPressed Start Tutoring");
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => EmotionWordsScreen(
+                            nativeLanguageCode: _getLanguageCode(
+                              _selectedNativeLanguage!,
+                            ),
+                          ),
+                    ),
+                  );
+                },
+                child: const Text('Start Learning'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  print("onPressed Check");
+                  // Get topic name from selected vocabulary
+                  final selectedVocabulary =
+                      _vocabularies.firstWhere(
+                        (v) => v['id'] == _selectedVocabulary,
+                      )['Name'];
+                  final level = _levelString;
+                  final languageCode = _getLanguageCode(
+                    _selectedNativeLanguage!,
+                  );
+
+                  bool exists = await DatabaseHelper().checkIfTopicExists(
+                    selectedVocabulary,
+                    level,
+                    languageCode,
+                  );
+                  print('Topic exists: $exists');
+
+                  if (!exists) {
+                    final jsonString = await getVocabularyData(
+                      level,
+                      selectedVocabulary,
+                      _selectedNativeLanguage!,
                     );
-                  }).toList(),
-                ),
-                const SizedBox(height: 24.0),
-                const Text(
-                  'Select Vocabulary',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8.0),
-                DropdownButton<int>(
-                  value: _selectedVocabulary,
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      _selectedVocabulary = newValue;
-                    });
-                  },
-                  items: _vocabularies
-                      .map<DropdownMenuItem<int>>((Map<String, dynamic> vocabulary) {
-                    return DropdownMenuItem<int>(
-                      value: vocabulary['id'],
-                      child: Text(vocabulary['Name'] ?? 'empty'),
-);
-                  }).toList(),
-                ),
-                const SizedBox(height: 24.0),
-                const Text(
-                  'Your native language',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8.0),
-                DropdownButton<String>(
-                  value: _selectedNativeLanguage,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedNativeLanguage = newValue;
-                    });
-                  },
-                  items: _nativeLanguages
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 24.0),
-                const Text(
-                  'Level',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8.0),
-                Slider(
-                  value: _level,
-                  min: 0.0,
-                  max: 5.0,
-                  divisions: 5,
-                  label: _levelString,
-                  onChanged: _onLevelChanged,
-                ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text('A1'),
-                    Text('A2'),
-                    Text('B1'),
-                    Text('B2'),
-                    Text('C1'),
-                    Text('C2'),
-                  ],
-                ),
-                const SizedBox(height: 24.0),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EmotionWordsScreen(nativeLanguageCode: _getLanguageCode(_selectedNativeLanguage!))),
-                   );
-                  },
-                  child: const Text('Start Tutoring'),
-                ),
-              ],
-            ),
+                    try {
+                      final List<dynamic> words = jsonDecode(jsonString);
+                      final db = await DatabaseHelper().database;
+                      final vocabId = _selectedVocabulary!;
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:4135065769.
+                      print('Inserting $vocabId vocabulary data...');
+                      for (var wordObj in words) {
+                        final word = wordObj['word'] as String;
+                        final translations =
+                            wordObj['translations'] as List<dynamic>;
+                        for (var translation in translations) {
+                          await db.insert('Translations', {
+                            'vocabulary': vocabId,
+                            'original_word': word,
+                            'word_level': level,
+                            'origin_lang': 'en',
+                            'transl_word': translation,
+                            'transl_code': languageCode,
+                            'learned': 0,
+                          });
+                        }
+                      }
+                      // After inserting, navigate to the next screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => EmotionWordsScreen(
+                                nativeLanguageCode: languageCode,
+                              ),
+                        ),
+                      );
+                    } catch (e) {
+                      print('Failed to parse or insert vocabulary data: $e');
+                    }
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => EmotionWordsScreen(
+                            nativeLanguageCode: _getLanguageCode(
+                              _selectedNativeLanguage!,
+                            ),
+                          ),
+                    ),
+                  );
+                },
+                child: const Text('Start Tutoring'),
+              ),
+            ],
+          ),
         ),
       ),
     );
