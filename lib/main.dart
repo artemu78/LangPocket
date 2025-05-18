@@ -55,6 +55,7 @@ class MyHomePage extends StatefulWidget {
   String? _selectedLearnLanguage;
   String? _selectedNativeLanguage;
   double _level = 0.0;
+  String _levelString = 'A1';
   int? _selectedVocabulary;
 
   final List<String> _learnLanguages = ['English'];
@@ -115,6 +116,7 @@ class MyHomePage extends StatefulWidget {
   void _onLevelChanged(double value) {
     setState(() {
       _level = value;
+      _levelString = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'][_level.round()];
     });
   }
 
@@ -180,7 +182,7 @@ class MyHomePage extends StatefulWidget {
                       value: vocabulary['id'],
                       child: Text(vocabulary['Name'] ?? 'empty'),
 );
-                  }).toList()
+                  }).toList(),
                 ),
                 const SizedBox(height: 24.0),
                 const Text(
@@ -214,7 +216,7 @@ class MyHomePage extends StatefulWidget {
                   min: 0.0,
                   max: 5.0,
                   divisions: 5,
-                  label: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'][_level.round()],
+                  label: _levelString,
                   onChanged: _onLevelChanged,
                 ),
                 const Row(

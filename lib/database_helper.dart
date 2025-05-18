@@ -51,6 +51,7 @@ class DatabaseHelper {
       CREATE TABLE Translations(
         vocabulary INTEGER NOT NULL,
         original_word TEXT NOT NULL,
+        word_level TEXT NOT NULL,
         origin_lang TEXT NOT NULL,
         transl_word TEXT NOT NULL,
         transl_code TEXT NOT NULL,
@@ -67,5 +68,23 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return {'id': maps[i]['id'] as int, 'Name': maps[i]['Name'] as String};
     });
+  }
+
+  Future<bool> checkIfTopicExists(
+      String topic,
+      String level,
+      String languageCode) async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
+      SELECT COUNT(*) FROM Translations t
+      JOIN Vocabulary v ON t.vocabulary = v.id
+      WHERE v.Name = ? AND t.word_level = ? AND t.transl_code = ?
+      ''',
+      [topic, level, languageCode],
+    );
+
+    int? count = Sqflite.firstIntValue(result);
+    return count != null && count > 0;
   }
 }
