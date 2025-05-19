@@ -60,13 +60,13 @@ class _MyHomePageState extends State<MyHomePage> {
   String? _selectedNativeLanguage;
   double _level = 0.0;
   String _levelString = 'A1';
-  int? _selectedVocabulary;
+  int _selectedVocabularyId = 0;
 
   final List<String> _learnLanguages = ['English'];
   final List<String> _nativeLanguages = [
+    'Turkish (Türkçe)',
     'Mandarin Chinese (普通话)',
     'Spanish (Español)',
-    'Turkish',
     'Hindi (हिन्दी)',
     'Arabic (العربية)',
     'Portuguese (Português)',
@@ -105,8 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     _loadVocabularies();
-    _selectedLearnLanguage = _learnLanguages.isNotEmpty ? _learnLanguages.first : null;
-    _selectedNativeLanguage = _nativeLanguages.isNotEmpty ? _nativeLanguages.first : null;
+    _selectedLearnLanguage =
+        _learnLanguages.isNotEmpty ? _learnLanguages.first : null;
+    _selectedNativeLanguage =
+        _nativeLanguages.isNotEmpty ? _nativeLanguages.first : null;
     super.initState();
   }
 
@@ -115,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _vocabularies = vocabularies;
       if (_vocabularies.isNotEmpty) {
-        _selectedVocabulary = _vocabularies.first['id'];
+        _selectedVocabularyId = _vocabularies.first['id'];
       }
     });
   }
@@ -179,10 +181,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               const SizedBox(height: 8.0),
               DropdownButton<int>(
-                value: _selectedVocabulary,
+                value: _selectedVocabularyId,
                 onChanged: (int? newValue) {
                   setState(() {
-                    _selectedVocabulary = newValue;
+                    // Suggested code may be subject to a license. Learn more: ~LicenseLog:3426361174.
+                    if (newValue != null) {
+                      _selectedVocabularyId = newValue;
+                    }
                   });
                 },
                 items:
@@ -246,11 +251,10 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(height: 24.0),
               ElevatedButton(
                 onPressed: () async {
-
                   // Get topic name from selected vocabulary
                   final selectedVocabulary =
                       _vocabularies.firstWhere(
-                        (v) => v['id'] == _selectedVocabulary,
+                        (v) => v['id'] == _selectedVocabularyId,
                       )['Name'];
                   final level = _levelString;
                   final languageCode = _getLanguageCode(
@@ -262,7 +266,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     level,
                     languageCode,
                   );
-                  print('Topic exists: $exists');
 
                   if (!exists) {
                     final jsonString = await getVocabularyData(
@@ -273,9 +276,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     try {
                       final List<dynamic> words = jsonDecode(jsonString);
                       final db = await DatabaseHelper().database;
-                      final vocabId = _selectedVocabulary!;
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:4135065769.
-                      print('Inserting $vocabId vocabulary data...');
+                      final vocabId = _selectedVocabularyId!;
+                      // Suggested code may be subject to a license. Learn more: ~LicenseLog:4135065769.
                       for (var wordObj in words) {
                         final word = wordObj['word'] as String;
                         final translations =
@@ -293,9 +295,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         }
                       }
                       // After inserting, navigate to the next screen
-                      print("Successfully inserted vocabulary data");
                     } catch (e) {
                       print('Failed to parse or insert vocabulary data: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Failed to load vocabulary data. Please try again.',
+                          ),
+                        ),
+                      );
+                      return;
                     }
                   }
                   Navigator.push(
@@ -306,6 +315,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             nativeLanguageCode: _getLanguageCode(
                               _selectedNativeLanguage!,
                             ),
+                            level: level,
+                            vocabId: _selectedVocabularyId,
+                            translCode: languageCode,
                           ),
                     ),
                   );

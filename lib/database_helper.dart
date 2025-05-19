@@ -87,4 +87,19 @@ class DatabaseHelper {
     int? count = Sqflite.firstIntValue(result);
     return count != null && count > 0;
   }
+
+  Future<List<Map<String, dynamic>>> getTranslationsForVocabulary(
+      int vocabularyId,
+      String level,
+      String languageCode) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'Translations',
+      columns: ['original_word', 'transl_word'],
+      where: 'vocabulary = ? AND word_level = ? AND transl_code = ?',
+      whereArgs: [vocabularyId, level, languageCode],
+    );
+
+    return maps;
+  }
 }
