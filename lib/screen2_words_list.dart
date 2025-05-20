@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'database_helper.dart'; // Ensure DatabaseHelper is imported
 import 'vocabulary_service.dart'; // Import the new service
 import 'package:LangPocket/services/local_log_service.dart'; // Updated import
+import 'package:LangPocket/widgets/main_app_scaffold.dart'; // Added import
 
 class EmotionWordsScreen extends StatefulWidget {
   const EmotionWordsScreen({
@@ -92,12 +93,9 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.vocabularyName), // UPDATED
-        backgroundColor: Colors.orange[700], // Warm color
-      ),
-      body: Container(
+    return MainAppScaffold( // Replaced Scaffold with MainAppScaffold
+      screenTitle: widget.vocabularyName, // Passed screenTitle
+      body: Container( // Moved existing body content here
         color: Colors.orange[100], // Warm color background
         child: _isLoading
             ? const Center(child: CircularProgressIndicator()) // Show loading indicator

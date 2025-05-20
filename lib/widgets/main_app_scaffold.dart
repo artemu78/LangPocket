@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:LangPocket/screens/error_logs_screen.dart'; // Assuming project name LangPocket
+import 'package:LangPocket/main.dart'; // Added import for MyHomePage
 
 class MainAppScaffold extends StatelessWidget {
   final Widget body;
@@ -33,6 +34,18 @@ class MainAppScaffold extends StatelessWidget {
                   fontSize: 24,
                 ),
               ),
+            ),
+            ListTile( // Added "Home" ListTile
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyHomePage(title: 'LangPocket')), // Ensure MyHomePage constructor is matched
+                  (Route<dynamic> route) => false, // Remove all routes below
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.info_outline),
