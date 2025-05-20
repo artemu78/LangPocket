@@ -3,6 +3,7 @@ import 'screen2_words_list.dart';
 import 'dart:convert';
 import 'database_helper.dart';
 import 'gemini_api_helper.dart';
+import 'vocabulary_service.dart'; // Import the new service
 
 void main() {
   runApp(const MyApp());
@@ -261,52 +262,29 @@ class _MyHomePageState extends State<MyHomePage> {
                     _selectedNativeLanguage!,
                   );
 
-                  bool exists = await DatabaseHelper().checkIfTopicExists(
-                    selectedVocabulary,
-                    level,
-                    languageCode,
+                  // Use the VocabularyService to fetch and save data
+                  final vocabularyService = VocabularyService();
+                  final success = await vocabularyService.fetchAndSaveVocabulary(
+                    vocabularyId: _selectedVocabularyId,
+                    selectedVocabulary: selectedVocabulary,
+                    level: level,
+                    selectedNativeLanguage: _selectedNativeLanguage!,
+                    languageCode: languageCode,
                   );
 
-                  if (!exists) {
-                    final jsonString = await getVocabularyData(
-                      level,
-                      selectedVocabulary,
-                      _selectedNativeLanguage!,
-                    );
-                    try {
-                      final List<dynamic> words = jsonDecode(jsonString);
-                      final db = await DatabaseHelper().database;
-                      final vocabId = _selectedVocabularyId!;
-                      // Suggested code may be subject to a license. Learn more: ~LicenseLog:4135065769.
-                      for (var wordObj in words) {
-                        final word = wordObj['word'] as String;
-                        final translations =
-                            wordObj['translations'] as List<dynamic>;
-                        for (var translation in translations) {
-                          await db.insert('Translations', {
-                            'vocabulary': vocabId,
-                            'original_word': word,
-                            'word_level': level,
-                            'origin_lang': 'en',
-                            'transl_word': translation,
-                            'transl_code': languageCode,
-                            'learned': 0,
-                          });
-                        }
-                      }
-                      // After inserting, navigate to the next screen
-                    } catch (e) {
-                      print('Failed to parse or insert vocabulary data: $e');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Failed to load vocabulary data. Please try again.',
-                          ),
+                  if (!success) {
+                    // Show an error message if fetching/saving failed
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Failed to load vocabulary data. Please try again.',
                         ),
-                      );
-                      return;
-                    }
+                      ),
+                    );
+                    return;
                   }
+
+                  // Navigate to the next screen after successful data handling
                   Navigator.push(
                     context,
                     MaterialPageRoute(
