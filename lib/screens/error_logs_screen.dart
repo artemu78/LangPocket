@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:LangPocket/services/local_log_service.dart'; // Assuming project name LangPocket
+import 'package:LangPocket/widgets/main_app_scaffold.dart'; // Added import
 
 class ErrorLogsScreen extends StatefulWidget {
   const ErrorLogsScreen({super.key});
@@ -128,18 +129,12 @@ class _ErrorLogsScreenState extends State<ErrorLogsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Error Logs'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_forever),
-            tooltip: 'Purge All Logs',
-            onPressed: _purgeLogs,
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
+    // The IconButton for purging logs that was in the AppBar is removed with the old AppBar.
+    // The _purgeLogs function is still part of the state, but not directly callable from the AppBar anymore.
+    // We might add a button for it in the body later if needed.
+    return MainAppScaffold( // Replaced Scaffold
+      screenTitle: 'Error Logs', // Passed screenTitle
+      body: RefreshIndicator( // Passed existing body
         onRefresh: _refreshLogs,
         child: Column(
           children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screen2_words_list.dart';
-import 'package:LangPocket/screens/error_logs_screen.dart'; // Added import
+import 'package:LangPocket/screens/error_logs_screen.dart';
+import 'package:LangPocket/widgets/main_app_scaffold.dart'; // Added import for MainAppScaffold
 import 'dart:convert';
 import 'database_helper.dart';
 import 'gemini_api_helper.dart';
@@ -139,79 +140,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.title: const Text('LangPocket - pocket language tutor'),
-        title: const Text('LangPocket'), // Updated AppBar title
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue, // Example color, can be themed
-              ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('About'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext dialogContext) {
-                    return AlertDialog(
-                      title: const Text('About LangPocket'),
-                      content: const SingleChildScrollView( // Use SingleChildScrollView if content might overflow
-                        child: ListBody(
-                          children: <Widget>[
-                            Text('Version: 1.0.3'), // Consider making this dynamic later if possible
-                            SizedBox(height: 8),
-                            Text('LangPocket is a pocket tutor for your language learning cards, helping you build and review vocabulary with ease.'),
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('OK'),
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop(); // Close the dialog
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.error_outline),
-              title: const Text('Error Logs'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ErrorLogsScreen()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Center(
+    return MainAppScaffold( // Replaced Scaffold with MainAppScaffold
+      screenTitle: 'LangPocket', // Passed screenTitle
+      body: Center( // Moved existing body content here
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
