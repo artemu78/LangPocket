@@ -146,7 +146,45 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.title: const Text('LangPocket - pocket language tutor'),
-        title: const Text('LangPocket - pocket language tutor'),
+        title: const Text('LangPocket'), // Updated AppBar title
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue, // Example color, can be themed
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('About'),
+              onTap: () {
+                print('About menu item tapped');
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.error_outline),
+              title: const Text('Error Logs'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer first
+                // TODO: Navigate to ErrorLogsScreen
+                // For now, print a message until ErrorLogsScreen is created
+                print('Error Logs menu item tapped - navigation pending');
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => ErrorLogsScreen())); // This line will be enabled later
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: Padding(

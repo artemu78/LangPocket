@@ -61,6 +61,17 @@ class DatabaseHelper {
       )
     ''');
     await db.execute('CREATE INDEX idx_translations_vocabulary ON Translations(vocabulary)'); // Index on vocabulary (now INTEGER ID)
+
+    // Create the AppLogs table
+    await db.execute('''
+      CREATE TABLE AppLogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT NOT NULL,
+        message TEXT NOT NULL,
+        error TEXT,
+        stackTrace TEXT
+      )
+    ''');
   }
 
   Future<List<Map<String, dynamic>>> getVocabularies() async {

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'database_helper.dart';
 import 'gemini_api_helper.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:LangPocket/services/logging_service.dart';
+import 'package:LangPocket/services/local_log_service.dart'; // Updated import
 
 class VocabularyService {
   Future<bool> fetchAndSaveVocabulary({
@@ -53,7 +53,7 @@ class VocabularyService {
         return true; // Data fetched and saved successfully
       } catch (e, s) {
         print('Error decoding or saving vocabulary data: $e');
-        await logError('Error decoding or saving vocabulary data', error: e, stackTrace: s);
+        await LocalLogService().logErrorLocal('Error decoding or saving vocabulary data', error: e, stackTrace: s); // Updated to LocalLogService
         return false; // Error occurred
       }
     }

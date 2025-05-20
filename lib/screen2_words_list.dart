@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart'; // Ensure DatabaseHelper is imported
 import 'vocabulary_service.dart'; // Import the new service
-import 'package:LangPocket/services/logging_service.dart';
+import 'package:LangPocket/services/local_log_service.dart'; // Updated import
 
 class EmotionWordsScreen extends StatefulWidget {
   const EmotionWordsScreen({
@@ -83,7 +83,7 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
       setState(() {
         _isLoading = false;
       });
-      await logError('An error occurred in _fetchAndDisplayVocabulary', error: e, stackTrace: s);
+      await LocalLogService().logErrorLocal('An error occurred in _fetchAndDisplayVocabulary', error: e, stackTrace: s); // Updated to LocalLogService
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: ${e.toString()}')),
       );
