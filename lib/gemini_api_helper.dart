@@ -36,6 +36,7 @@ Future<String> getVocabularyData(String languageLevel, String topic, String lang
   Ensure the JSON is valid and not wrapped in markdown code blocks.
   ''';
 
+  print(prompt);
   try {
     final response = await http.post(
       Uri.parse('$apiUrl?key=$GEMINI_API_KEY'),
@@ -92,6 +93,6 @@ Future<String> getVocabularyData(String languageLevel, String topic, String lang
   } catch (e) {
     // Handle any exceptions during the process (e.g., network errors)
     print('Exception during Gemini API call: $e');
-    return 'Error: An exception occurred while calling the API.';
+    return 'Error: An exception occurred while calling the API: ${e.toString()}';
   }
 }

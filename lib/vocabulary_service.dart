@@ -27,6 +27,7 @@ class VocabularyService {
         selectedVocabulary,
         selectedNativeLanguage,
       );
+      print(jsonString);
       try {
         final List<dynamic> words = jsonDecode(jsonString);
         final db = await DatabaseHelper().database;
