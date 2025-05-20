@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screen2_words_list.dart';
+import 'package:LangPocket/screens/error_logs_screen.dart'; // Added import
 import 'dart:convert';
 import 'database_helper.dart';
 import 'gemini_api_helper.dart';
@@ -168,19 +169,43 @@ class _MyHomePageState extends State<MyHomePage> {
               leading: const Icon(Icons.info_outline),
               title: const Text('About'),
               onTap: () {
-                print('About menu item tapped');
                 Navigator.pop(context); // Close the drawer
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    return AlertDialog(
+                      title: const Text('About LangPocket'),
+                      content: const SingleChildScrollView( // Use SingleChildScrollView if content might overflow
+                        child: ListBody(
+                          children: <Widget>[
+                            Text('Version: 1.0.3'), // Consider making this dynamic later if possible
+                            SizedBox(height: 8),
+                            Text('LangPocket is a pocket tutor for your language learning cards, helping you build and review vocabulary with ease.'),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop(); // Close the dialog
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
             ),
             ListTile(
               leading: const Icon(Icons.error_outline),
               title: const Text('Error Logs'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer first
-                // TODO: Navigate to ErrorLogsScreen
-                // For now, print a message until ErrorLogsScreen is created
-                print('Error Logs menu item tapped - navigation pending');
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => ErrorLogsScreen())); // This line will be enabled later
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ErrorLogsScreen()),
+                );
               },
             ),
           ],
