@@ -96,7 +96,9 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
     return MainAppScaffold( // Replaced Scaffold with MainAppScaffold
       screenTitle: widget.vocabularyName, // Passed screenTitle
       body: Container( // Moved existing body content here
-        color: Colors.orange[100], // Warm color background
+        color: Theme.of(context).colorScheme.background, // UPDATED color
+        width: double.infinity, // Ensured width
+        height: double.infinity, // Ensured height
         child: _isLoading
             ? const Center(child: CircularProgressIndicator()) // Show loading indicator
             : _vocabularyWords.isEmpty
@@ -168,15 +170,15 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue, // Or Theme.of(context).primaryColor
+                                backgroundColor: Theme.of(context).colorScheme.primary, // UPDATED
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
                                   vertical: 12,
                                 ),
                               ),
-                              child: const Text(
+                              child: Text( // UPDATED to use Text widget for dynamic color
                                 'Learn selected words',
-                                style: TextStyle(fontSize: 18, color: Colors.white),
+                                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary), // UPDATED
                               ),
                             ),
                             const SizedBox(height: 8), // Spacing between buttons

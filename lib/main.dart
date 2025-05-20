@@ -142,10 +142,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return MainAppScaffold( // Replaced Scaffold with MainAppScaffold
       screenTitle: 'LangPocket', // Passed screenTitle
-      body: Center( // Moved existing body content here
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+      body: Container( // Wrapped existing body with Container
+        color: Theme.of(context).colorScheme.background,
+        width: double.infinity,
+        height: double.infinity,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
             children: <Widget>[
               const Text(
                 'Language you are going to learn',

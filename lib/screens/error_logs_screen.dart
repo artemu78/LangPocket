@@ -134,9 +134,13 @@ class _ErrorLogsScreenState extends State<ErrorLogsScreen> {
     // We might add a button for it in the body later if needed.
     return MainAppScaffold( // Replaced Scaffold
       screenTitle: 'Error Logs', // Passed screenTitle
-      body: RefreshIndicator( // Passed existing body
-        onRefresh: _refreshLogs,
-        child: Column(
+      body: Container( // Wrapped existing body with Container
+        color: Theme.of(context).colorScheme.background,
+        width: double.infinity,
+        height: double.infinity,
+        child: RefreshIndicator(
+          onRefresh: _refreshLogs,
+          child: Column(
           children: [
             Expanded(
               child: _isLoading && _logs.isEmpty
