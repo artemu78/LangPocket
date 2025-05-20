@@ -49,6 +49,7 @@ class DatabaseHelper {
     // Create the Translations table with a foreign key and index
     await db.execute('''
       CREATE TABLE Translations(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         vocabulary INTEGER NOT NULL,
         original_word TEXT NOT NULL,
         word_level TEXT NOT NULL,

@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'LangPocket',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         //
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Language pocket - pocket for your language learning cards'),
     );
   }
 }
