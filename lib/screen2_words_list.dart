@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart'; // Ensure DatabaseHelper is imported
 import 'vocabulary_service.dart'; // Import the new service
+import 'package:LangPocket/services/logging_service.dart';
 
 class EmotionWordsScreen extends StatefulWidget {
   const EmotionWordsScreen({
@@ -9,12 +10,14 @@ class EmotionWordsScreen extends StatefulWidget {
     this.vocabId = 0,
     required this.level,
     required this.translCode,
+    required this.vocabularyName, // Added
   });
 
   final String nativeLanguageCode;
   final int vocabId;
   final String level;
   final String translCode;
+  final String vocabularyName; // Added
 
   @override
   // ignore: library_private_types_in_public_api
@@ -33,6 +36,7 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
   }
 
   Future<void> _fetchAndDisplayVocabulary() async {
+    // DIAGNOSTIC PRINTS REMOVED
     setState(() {
       _isLoading = true;
     });
@@ -47,7 +51,7 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
       // Let's assume these are sufficient to identify and fetch the correct vocabulary.
       final success = await vocabularyService.fetchAndSaveVocabulary(
         vocabularyId: widget.vocabId,
-        selectedVocabulary: 'Emotion Words', // This might need refinement depending on actual usage
+        selectedVocabulary: widget.vocabularyName, // UPDATED
         level: widget.level,
         selectedNativeLanguage: widget.nativeLanguageCode,
         languageCode: widget.translCode,
@@ -75,10 +79,11 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
           const SnackBar(content: Text('Failed to fetch and save vocabulary.')),
         );
       }
-    } catch (e) {
+    } catch (e, s) {
       setState(() {
         _isLoading = false;
       });
+      await logError('An error occurred in _fetchAndDisplayVocabulary', error: e, stackTrace: s);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: ${e.toString()}')),
       );
@@ -89,7 +94,7 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Emotion Words'), // Title might become dynamic based on vocabulary
+        title: Text(widget.vocabularyName), // UPDATED
         backgroundColor: Colors.orange[700], // Warm color
       ),
       body: Container(

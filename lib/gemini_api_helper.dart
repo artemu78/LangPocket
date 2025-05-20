@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:LangPocket/services/logging_service.dart';
 
 const String GEMINI_API_KEY = String.fromEnvironment('GEMINI_API_KYE', defaultValue: 'AIzaSyATFZfhzaC9kBJcLqRk1WGA4PNxtWEsE5Y');
 const String apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
@@ -88,11 +89,13 @@ Future<String> getVocabularyData(String languageLevel, String topic, String lang
       // Handle HTTP error
       print('Error calling Gemini API: ${response.statusCode}');
       print('Response body: ${response.body}');
+      await logError('Error calling Gemini API: ${response.statusCode}', error: response.body);
       return 'Error: Failed to fetch vocabulary data. Status code: ${response.statusCode}';
     }
-  } catch (e) {
+  } catch (e, s) {
     // Handle any exceptions during the process (e.g., network errors)
     print('Exception during Gemini API call: $e');
+    await logError('Exception during Gemini API call', error: e, stackTrace: s);
     return 'Error: An exception occurred while calling the API: ${e.toString()}';
   }
 }

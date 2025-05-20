@@ -285,6 +285,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
 
                   // Navigate to the next screen after successful data handling
+                  // Navigate to the next screen after successful data handling
+                  final String selectedVocabularyName = _vocabularies.firstWhere((v) => v['id'] == _selectedVocabularyId)['Name'];
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -296,6 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             level: level,
                             vocabId: _selectedVocabularyId,
                             translCode: languageCode,
+                            vocabularyName: selectedVocabularyName, // Pass the name
                           ),
                     ),
                   );

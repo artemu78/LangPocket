@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'database_helper.dart';
 import 'gemini_api_helper.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:LangPocket/services/logging_service.dart';
 
 class VocabularyService {
   Future<bool> fetchAndSaveVocabulary({
@@ -17,8 +18,10 @@ class VocabularyService {
       level,
       languageCode,
     );
+    // DIAGNOSTIC PRINT REMOVED
 
     if (!exists) {
+      // DIAGNOSTIC PRINT REMOVED
       // Pass the level as String to getVocabularyData, assuming it can handle it or
       // that the gemini_api_helper needs to be updated to handle double if necessary.
       // Based on the error message, it seems getVocabularyData expects a String.
@@ -48,8 +51,9 @@ class VocabularyService {
           }
         }
         return true; // Data fetched and saved successfully
-      } catch (e) {
+      } catch (e, s) {
         print('Error decoding or saving vocabulary data: $e');
+        await logError('Error decoding or saving vocabulary data', error: e, stackTrace: s);
         return false; // Error occurred
       }
     }
@@ -59,6 +63,7 @@ class VocabularyService {
   Future<List<Map<String, dynamic>>> getVocabularyWords({
     required int vocabId,
   }) async {
+    // DIAGNOSTIC PRINT REMOVED
     final db = await DatabaseHelper().database;
     final List<Map<String, dynamic>> maps = await db.query(
       'Translations',
@@ -66,8 +71,10 @@ class VocabularyService {
       where: 'vocabulary = ?',
       whereArgs: [vocabId],
     );
+    // DIAGNOSTIC PRINT REMOVED
 
     if (maps.isEmpty) {
+      // DIAGNOSTIC PRINT REMOVED
       return [];
     }
 
