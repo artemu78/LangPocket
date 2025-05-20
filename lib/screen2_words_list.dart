@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart'; // Ensure DatabaseHelper is imported
 import 'vocabulary_service.dart'; // Import the new service
 
 class EmotionWordsScreen extends StatefulWidget {
@@ -21,7 +22,8 @@ class EmotionWordsScreen extends StatefulWidget {
 }
 
 class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
-  List<Map<String, String>> _vocabularyWords = [];
+  List<Map<String, dynamic>> _vocabularyWords = [];
+  final Set<int> _selectedWordIds = <int>{};
   bool _isLoading = true;
 
   @override
@@ -58,6 +60,7 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
 
         setState(() {
           _vocabularyWords = fetchedWords;
+          _selectedWordIds.clear(); // Clear selections when new words are fetched
           _isLoading = false;
         });
 
@@ -102,27 +105,38 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
                           itemCount: _vocabularyWords.length,
                           itemBuilder: (context, index) {
                             final word = _vocabularyWords[index];
+                            final wordId = word['id'] as int;
                             return Card(
                               margin: const EdgeInsets.symmetric(
                                 horizontal: 8.0,
                                 vertical: 4.0,
                               ),
                               elevation: 2.0,
-                              child: ListTile(
+                              child: CheckboxListTile(
                                 title: Text(
-                                  word['english'] ?? 'N/A', // Assuming 'english' key
+                                  word['english']?.toString() ?? 'N/A',
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 subtitle: Text(
-                                  word['translation'] ?? 'N/A', // Assuming 'translation' key
+                                  word['translation']?.toString() ?? 'N/A',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
+                                value: _selectedWordIds.contains(wordId),
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    if (newValue == true) {
+                                      _selectedWordIds.add(wordId);
+                                    } else {
+                                      _selectedWordIds.remove(wordId);
+                                    }
+                                  });
+                                },
                               ),
                             );
                           },
@@ -130,19 +144,54 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: ElevatedButton(
-                          onPressed: _fetchAndDisplayVocabulary, // Button to refetch/refresh
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange[700], // Warm button color
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
+                        child: Column( // Use a Column for multiple buttons
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (_selectedWordIds.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('No words selected.')),
+                                  );
+                                  return;
+                                }
+                                final dbHelper = DatabaseHelper();
+                                await dbHelper.updateLearnedStatus(_selectedWordIds.toList(), 2);
+                                setState(() {
+                                  _selectedWordIds.clear();
+                                });
+                                await _fetchAndDisplayVocabulary(); // Refresh the list
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Selected words marked as learned!')),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue, // Or Theme.of(context).primaryColor
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: const Text(
+                                'Learn selected words',
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'Refresh Vocabulary', // Button text changed
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
+                            const SizedBox(height: 8), // Spacing between buttons
+                            ElevatedButton(
+                              onPressed: _fetchAndDisplayVocabulary, // Button to refetch/refresh
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange[700], // Warm button color
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: const Text(
+                                'Refresh Vocabulary', // Button text changed
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

@@ -56,12 +56,13 @@ class VocabularyService {
     return true; // Topic already exists
   }
 
-  Future<List<Map<String, String>>> getVocabularyWords({
+  Future<List<Map<String, dynamic>>> getVocabularyWords({
     required int vocabId,
   }) async {
     final db = await DatabaseHelper().database;
     final List<Map<String, dynamic>> maps = await db.query(
       'Translations',
+      columns: ['id', 'original_word', 'transl_word', 'learned'],
       where: 'vocabulary = ?',
       whereArgs: [vocabId],
     );
@@ -70,26 +71,16 @@ class VocabularyService {
       return [];
     }
 
-    // Group translations by original_word
-    final Map<String, List<String>> groupedWords = {};
+    // Format for display
+    final List<Map<String, dynamic>> vocabularyList = [];
     for (var item in maps) {
-      final originalWord = item['original_word'] as String;
-      final translatedWord = item['transl_word'] as String;
-
-      if (!groupedWords.containsKey(originalWord)) {
-        groupedWords[originalWord] = [];
-      }
-      groupedWords[originalWord]!.add(translatedWord);
-    }
-
-    // Format for display, joining multiple translations if they exist
-    final List<Map<String, String>> vocabularyList = [];
-    groupedWords.forEach((originalWord, translations) {
       vocabularyList.add({
-        'english': originalWord,
-        'translation': translations.join(', '), // Join multiple translations
+        'id': item['id'] as int,
+        'english': item['original_word'] as String,
+        'translation': item['transl_word'] as String,
+        'learned': item['learned'] as int,
       });
-    });
+    }
 
     return vocabularyList;
   }

@@ -103,4 +103,18 @@ class DatabaseHelper {
 
     return maps;
   }
+
+  Future<void> updateLearnedStatus(List<int> ids, int learnedValue) async {
+    final db = await database;
+    final batch = db.batch();
+    for (final id in ids) {
+      batch.update(
+        'Translations',
+        {'learned': learnedValue},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
+    await batch.commit(noResult: true);
+  }
 }
