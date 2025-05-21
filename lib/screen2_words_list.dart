@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart'; // Ensure DatabaseHelper is imported
 import 'vocabulary_service.dart'; // Import the new service
+import 'package:LangPocket/services/local_log_service.dart'; // Updated import
+import 'package:LangPocket/widgets/main_app_scaffold.dart'; // Added import
 
 class EmotionWordsScreen extends StatefulWidget {
   const EmotionWordsScreen({
@@ -9,12 +11,14 @@ class EmotionWordsScreen extends StatefulWidget {
     this.vocabId = 0,
     required this.level,
     required this.translCode,
+    required this.vocabularyName, // Added
   });
 
   final String nativeLanguageCode;
   final int vocabId;
   final String level;
   final String translCode;
+  final String vocabularyName; // Added
 
   @override
   // ignore: library_private_types_in_public_api
@@ -33,6 +37,7 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
   }
 
   Future<void> _fetchAndDisplayVocabulary() async {
+    // DIAGNOSTIC PRINTS REMOVED
     setState(() {
       _isLoading = true;
     });
@@ -47,7 +52,7 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
       // Let's assume these are sufficient to identify and fetch the correct vocabulary.
       final success = await vocabularyService.fetchAndSaveVocabulary(
         vocabularyId: widget.vocabId,
-        selectedVocabulary: 'Emotion Words', // This might need refinement depending on actual usage
+        selectedVocabulary: widget.vocabularyName, // UPDATED
         level: widget.level,
         selectedNativeLanguage: widget.nativeLanguageCode,
         languageCode: widget.translCode,
@@ -75,10 +80,11 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
           const SnackBar(content: Text('Failed to fetch and save vocabulary.')),
         );
       }
-    } catch (e) {
+    } catch (e, s) {
       setState(() {
         _isLoading = false;
       });
+      await LocalLogService().logErrorLocal('An error occurred in _fetchAndDisplayVocabulary', error: e, stackTrace: s); // Updated to LocalLogService
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: ${e.toString()}')),
       );
@@ -87,13 +93,12 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Emotion Words'), // Title might become dynamic based on vocabulary
-        backgroundColor: Colors.orange[700], // Warm color
-      ),
-      body: Container(
-        color: Colors.orange[100], // Warm color background
+    return MainAppScaffold( // Replaced Scaffold with MainAppScaffold
+      screenTitle: widget.vocabularyName, // Passed screenTitle
+      body: Container( // Moved existing body content here
+        color: Theme.of(context).colorScheme.background, // UPDATED color
+        width: double.infinity, // Ensured width
+        height: double.infinity, // Ensured height
         child: _isLoading
             ? const Center(child: CircularProgressIndicator()) // Show loading indicator
             : _vocabularyWords.isEmpty
@@ -165,15 +170,15 @@ class _EmotionWordsScreenState extends State<EmotionWordsScreen> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue, // Or Theme.of(context).primaryColor
+                                backgroundColor: Theme.of(context).colorScheme.primary, // UPDATED
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
                                   vertical: 12,
                                 ),
                               ),
-                              child: const Text(
+                              child: Text( // UPDATED to use Text widget for dynamic color
                                 'Learn selected words',
-                                style: TextStyle(fontSize: 18, color: Colors.white),
+                                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary), // UPDATED
                               ),
                             ),
                             const SizedBox(height: 8), // Spacing between buttons
