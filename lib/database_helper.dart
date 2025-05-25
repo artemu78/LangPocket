@@ -72,6 +72,32 @@ class DatabaseHelper {
         stackTrace TEXT
       )
     ''');
+
+    // Create the Settings table
+    await db.execute('CREATE TABLE Settings(setting_key TEXT PRIMARY KEY, setting_value TEXT)');
+  }
+
+  Future<void> saveSetting(String key, String value) async {
+    final db = await database;
+    await db.insert(
+      'Settings',
+      {'setting_key': key, 'setting_value': value},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String?> getSetting(String key) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'Settings',
+      columns: ['setting_value'],
+      where: 'setting_key = ?',
+      whereArgs: [key],
+    );
+    if (maps.isNotEmpty) {
+      return maps.first['setting_value'] as String?;
+    }
+    return null;
   }
 
   Future<List<Map<String, dynamic>>> getVocabularies() async {
