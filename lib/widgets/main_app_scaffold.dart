@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:LangPocket/screens/error_logs_screen.dart'; // Assuming project name LangPocket
-import 'package:LangPocket/main.dart'; // Added import for MyHomePage
+// Removed import for MyHomePage as it's no longer used directly for navigation here
+import 'package:LangPocket/screens/main_screen.dart'; // Added import for MainScreen
 
 class MainAppScaffold extends StatelessWidget {
   final Widget body;
@@ -42,7 +43,7 @@ class MainAppScaffold extends StatelessWidget {
                 Navigator.pop(context); // Close drawer
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const MyHomePage(title: 'LangPocket')), // Ensure MyHomePage constructor is matched
+                  MaterialPageRoute(builder: (context) => const MainScreen()), // Changed to MainScreen
                   (Route<dynamic> route) => false, // Remove all routes below
                 );
               },
