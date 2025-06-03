@@ -61,6 +61,9 @@ class MainAppScaffold extends StatelessWidget {
                         child: ListBody(
                           children: <Widget>[
                             Text('Version: 1.0.3'),
+                            Text('Authors'),
+                            Text('Cem'), // Assuming Cem is the author
+                            SizedBox(height: 8),
                             SizedBox(height: 8),
                             Text('LangPocket is a pocket tutor for your language learning cards, helping you build and review vocabulary with ease.'),
                           ],
