@@ -120,6 +120,31 @@ class MockCookieManager extends Mock implements CookieManager {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized(); // Ensure binding is initialized
 
+
+  // Helper function to find a specific header row and check its checkbox
+  Future<void> expectHeaderEnabled(WidgetTester tester, String headerKey, String headerValue, bool isEnabled) async {
+    // Find TextFormFields for key and value to locate the row.
+    expect(find.widgetWithText(TextFormField, headerKey), findsOneWidget, reason: 'TextFormField for key "$headerKey" should be present.');
+    expect(find.widgetWithText(TextFormField, headerValue), findsOneWidget, reason: 'TextFormField for value "$headerValue" should be present.');
+
+    // Find the Row that contains this header key.
+    final headerKeyFieldFinder = find.widgetWithText(TextFormField, headerKey);
+    final rowFinder = find.ancestor(
+      of: headerKeyFieldFinder,
+      matching: find.byType(Row),
+    );
+    expect(rowFinder, findsOneWidget, reason: 'Row containing header "$headerKey" should be found.');
+
+    // Within that Row, find the Checkbox and check its state.
+    final checkboxFinder = find.descendant(
+      of: rowFinder,
+      matching: find.byType(Checkbox),
+    );
+    expect(checkboxFinder, findsOneWidget, reason: 'Checkbox in row for header "$headerKey" should be found.');
+    final Checkbox checkboxWidget = tester.widget<Checkbox>(checkboxFinder);
+    expect(checkboxWidget.value, isEnabled, reason: 'Checkbox for header "$headerKey" should be ${isEnabled ? 'checked' : 'unchecked'}.');
+  }
+
   late MockInAppWebViewController mockWebViewController;
   late MockLocalLogServiceManual mockLogService; // Use the manual mock for LocalLogService
   // late MockCookieManager mockCookieManager; // Instance for CookieManager
@@ -144,22 +169,32 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       // If WebViewScreen were refactored to take LocalLogService or CookieManager:
       // home: WebViewScreen(logService: logService ?? MockLocalLogServiceManual()),
-      home: WebViewScreen(), // Current implementation
+      home: const WebViewScreen(), // Current implementation
     ));
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Initial UI Rendering (including Cookie TextField)', (WidgetTester tester) async {
+  testWidgets('Initial UI Rendering (including Cookie TextField and Default Headers)', (WidgetTester tester) async {
     await pumpWebViewScreen(tester);
 
     expect(find.text('Web View'), findsOneWidget, reason: "AppBar title should be 'Web View'");
-    expect(find.widgetWithText(TextField, 'Enter URL'), findsOneWidget, reason: "URL input TextField should be present"); // Checks for the main URL field
+    expect(find.widgetWithText(TextField, 'Enter URL'), findsOneWidget, reason: "URL input TextField should be present");
     expect(find.widgetWithText(ElevatedButton, 'Go'), findsOneWidget, reason: "'Go' button should be present");
     expect(find.widgetWithText(ElevatedButton, 'Add Header'), findsOneWidget, reason: "'Add Header' button should be present");
     expect(find.byType(InAppWebView), findsOneWidget, reason: "InAppWebView widget should be present");
 
     // Verify Cookie TextField presence
     expect(find.widgetWithText(TextField, 'Enter cookie values (e.g., name1=value1; name2=value2)'), findsOneWidget, reason: "Cookie input TextField should be present");
+
+    // Verify default headers
+    await expectHeaderEnabled(tester, 'User-Agent', 'LangPocketWebView/1.0', true);
+    await expectHeaderEnabled(tester, 'x-zalando-entity-id', 'checkoutconfirm', true);
+    await expectHeaderEnabled(tester, 'x-re-hints', 'checkout-confirm', true);
+    await expectHeaderEnabled(tester, 'x-zalando-entity-type', 'checkoutcontract', true);
+    await expectHeaderEnabled(tester, 'x-zalando-feature', 'checkout-confirm', true);
+    await expectHeaderEnabled(tester, 'x-device-type', 'mobile', true);
+    await expectHeaderEnabled(tester, 'x-re-webview', 'true', true);
+    await expectHeaderEnabled(tester, 'x-zalando-client-id', 'dca76205-a22c-4d70-a346-87c2b6442954', true);
   });
 
   testWidgets('Entering text in Cookie TextField updates its controller', (WidgetTester tester) async {

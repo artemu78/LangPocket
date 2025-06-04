@@ -13,6 +13,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
   final _urlController = TextEditingController(text: 'https://flutter.dev');
   final _headers = <Map<String, dynamic>>[
     {'key': 'User-Agent', 'value': 'LangPocketWebView/1.0', 'enabled': true},
+    {'key': 'x-zalando-entity-id', 'value': 'checkoutconfirm', 'enabled': true},
+    {'key': 'x-re-hints', 'value': 'checkout-confirm', 'enabled': true},
+    {'key': 'x-zalando-entity-type', 'value': 'checkoutcontract', 'enabled': true},
+    {'key': 'x-zalando-feature', 'value': 'checkout-confirm', 'enabled': true},
+    {'key': 'x-device-type', 'value': 'mobile', 'enabled': true},
+    {'key': 'x-re-webview', 'value': 'true', 'enabled': true},
+    {'key': 'x-zalando-client-id', 'value': 'dca76205-a22c-4d70-a346-87c2b6442954', 'enabled': true},
   ];
   InAppWebViewController? _webViewController;
   final LocalLogService _logService = LocalLogService();
