@@ -92,9 +92,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
                   path: "/",
                   isSecure: webUri.scheme == "https",
                 );
-                _logService.addLog('VERBOSE', 'Setting cookie: $cookieName=$cookieValue for domain ${webUri.host}');
-              } catch (e) {
-                _logService.addLog('ERROR', 'Failed to set cookie $cookieName: $e');
+                print('VERBOSE: Setting cookie: $cookieName=$cookieValue for domain ${webUri.host}');
+              } catch (e, s) {
+                _logService.logErrorLocal('Failed to set cookie $cookieName', error: e, stackTrace: s);
                  if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error setting cookie: $cookieName')),
@@ -103,11 +103,11 @@ class _WebViewScreenState extends State<WebViewScreen> {
               }
             }
           } else if (cookiePair.trim().isNotEmpty) { // Log if not empty and not a valid pair
-            _logService.addLog('WARN', 'Malformed cookie part: "${cookiePair.trim()}"');
+            print('WARN: Malformed cookie part: "${cookiePair.trim()}"');
           }
         }
       } else {
-        _logService.addLog('WARN', 'URL has no host, cannot set cookies: $urlString');
+        print('WARN: URL has no host, cannot set cookies: $urlString');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('URL has no host, cannot set cookies.')),
@@ -125,7 +125,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
           activeHeaders[header['key']!] = header['value'] ?? '';
         }
       }
-      _logService.addLog('INFO', 'Navigating to: $urlString with headers: $activeHeaders');
+      print('INFO: Navigating to: $urlString with headers: $activeHeaders');
       _webViewController!.loadUrl(
         urlRequest: URLRequest(
           url: WebUri(urlString),
@@ -133,7 +133,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
         ),
       );
     } else {
-       _logService.addLog('ERROR', 'WebViewController is null. Cannot load URL.');
+       _logService.logErrorLocal('WebViewController is null. Cannot load URL.');
        if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
            const SnackBar(content: Text('WebView is not ready. Please try again.')),
@@ -204,6 +204,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
                         },
                       ),
                       Expanded(
+                        flex: 2, // Assigned flex factor
                         child: TextFormField(
                           initialValue: header['key'],
                           decoration: const InputDecoration(labelText: 'Header Name'),
@@ -212,6 +213,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
+                        flex: 3, // Assigned flex factor
                         child: TextFormField(
                           initialValue: header['value'],
                           decoration: const InputDecoration(labelText: 'Header Value'),
@@ -259,10 +261,10 @@ class _WebViewScreenState extends State<WebViewScreen> {
               pullToRefreshController: _pullToRefreshController,
               onWebViewCreated: (controller) {
                 _webViewController = controller;
-                _logService.addLog('INFO', 'WebView created.');
+                print('INFO: WebView created.');
               },
               onLoadStart: (controller, url) {
-                _logService.addLog('INFO', 'Loading started: ${url.toString()}');
+                print('INFO: Loading started: ${url.toString()}');
                 setState(() {
                   _urlController.text = url.toString();
                   _progress = 0; // Reset progress
@@ -270,7 +272,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
               },
               onLoadStop: (controller, url) async {
                 _pullToRefreshController?.endRefreshing();
-                _logService.addLog('INFO', 'Loading finished: ${url.toString()}');
+                print('INFO: Loading finished: ${url.toString()}');
                 setState(() {
                   if (url != null) { // Ensure url is not null before using
                     _urlController.text = url.toString();
@@ -280,14 +282,14 @@ class _WebViewScreenState extends State<WebViewScreen> {
               },
               onReceivedError: (controller, request, error) {
                 _pullToRefreshController?.endRefreshing();
-                _logService.addLog('ERROR', 'WebView error: ${error.description} for ${request.url}');
+                _logService.logErrorLocal('WebView error: ${error.description} for ${request.url}', error: error);
                  setState(() {
                     _progress = 1.0; // Stop progress on error
                   });
               },
               onReceivedHttpError: (controller, request, errorResponse) {
                 _pullToRefreshController?.endRefreshing();
-                _logService.addLog('ERROR', 'HTTP error: ${errorResponse.statusCode} ${errorResponse.reasonPhrase} for ${request.url}');
+                _logService.logErrorLocal('HTTP error: ${errorResponse.statusCode} ${errorResponse.reasonPhrase} for ${request.url}', error: errorResponse);
                  setState(() {
                     _progress = 1.0; // Stop progress on error
                   });
@@ -298,7 +300,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 });
               },
                onConsoleMessage: (controller, consoleMessage) {
-                _logService.addLog('CONSOLE', '${consoleMessage.messageLevel.toString()}: ${consoleMessage.message}');
+                print('CONSOLE: ${consoleMessage.messageLevel.toString()}: ${consoleMessage.message}');
               },
               onAjaxReadyStateChange: (controller, ajaxRequest) async {
                 if (ajaxRequest.readyState == AjaxRequestReadyState.DONE) {
@@ -306,12 +308,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
                   if (ajaxRequest.data != null && ajaxRequest.data!.isNotEmpty) {
                     requestBody = ajaxRequest.data!;
                   }
-                  _logService.addLog('AJAX_REQUEST', 'URL: ${ajaxRequest.url}, Method: ${ajaxRequest.method}, Headers: ${ajaxRequest.headers}, Body: $requestBody');
+                  print('AJAX_REQUEST: URL: ${ajaxRequest.url}, Method: ${ajaxRequest.method}, Headers: ${ajaxRequest.headers}, Body: $requestBody');
 
                   // It's tricky to get response body directly here for all cases.
                   // The InAppWebView documentation should be consulted for best practices on capturing AJAX responses.
                   // For now, we log what's available in ajaxRequest.responseText or similar if it exists.
-                  _logService.addLog('AJAX_RESPONSE', 'URL: ${ajaxRequest.url}, Status: ${ajaxRequest.status}, StatusText: ${ajaxRequest.statusText}, ResponseType: ${ajaxRequest.responseType}, Response: ${ajaxRequest.responseText?.substring(0, (ajaxRequest.responseText?.length ?? 0) > 500 ? 500 : (ajaxRequest.responseText?.length ?? 0)) ?? "N/A"}');
+                  print('AJAX_RESPONSE: URL: ${ajaxRequest.url}, Status: ${ajaxRequest.status}, StatusText: ${ajaxRequest.statusText}, ResponseType: ${ajaxRequest.responseType}, Response: ${ajaxRequest.responseText?.substring(0, (ajaxRequest.responseText?.length ?? 0) > 500 ? 500 : (ajaxRequest.responseText?.length ?? 0)) ?? "N/A"}');
                 }
                 return AjaxRequestAction.PROCEED;
               },

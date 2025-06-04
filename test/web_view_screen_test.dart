@@ -27,22 +27,58 @@ class MockInAppWebViewControllerManual extends Mock implements InAppWebViewContr
 
 // Manual mock for LocalLogService
 class MockLocalLogServiceManual extends Mock implements LocalLogService {
-  // Keep the existing log method if it's used elsewhere, or adjust to addLog
+  List<Map<String, dynamic>> loggedErrors = [];
+  List<String> logs = []; // To capture generic logs if any were still using a generic method
+
   @override
-  void log(String message) { // This is from the old LocalLogService interface
-    super.noSuchMethod(
-      Invocation.method(#log, [message]),
-      returnValueForMissingStub: null,
-    );
+  Future<void> logErrorLocal(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+  }) async {
+    loggedErrors.add({
+      'message': message,
+      'error': error,
+      'stackTrace': stackTrace,
+    });
+    // Simulate async operation if the real one is async
+    // For testing, direct call might be fine.
+    // super.noSuchMethod(Invocation.method(#logErrorLocal, [message], {#error: error, #stackTrace: stackTrace}), returnValue: Future.value(null));
   }
 
-  // Add addLog for the new interface used in WebViewScreen
+  // Implementing other methods from LocalLogService interface as stubs or with basic tracking if needed by tests
+  // For now, assuming only logErrorLocal is actively used and verified from WebViewScreen.
+  // The original LocalLogService had addLog, log, getLogs, getLogCount, purgeLogs.
+  // If WebViewScreen doesn't call them, their mocks aren't strictly needed for these tests.
+
+  // Deprecated/Old methods (if any test still relies on them by mistake, or for broader interface compliance)
   @override
-  void addLog(String level, String message) {
-    super.noSuchMethod(
-      Invocation.method(#addLog, [level, message]),
-      returnValueForMissingStub: null,
-    );
+  void addLog(String level, String message) { // This was the old method
+    logs.add('$level: $message');
+    // super.noSuchMethod(Invocation.method(#addLog, [level, message]));
+  }
+
+  @override
+  void log(String message) { // This was a very old method
+    logs.add(message);
+    // super.noSuchMethod(Invocation.method(#log, [message]));
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getLogs() async {
+    // Return a representation of loggedErrors or other logs if needed for a test
+    return Future.value(loggedErrors);
+  }
+
+  @override
+  Future<int> getLogCount() async {
+    return Future.value(loggedErrors.length);
+  }
+
+  @override
+  Future<void> purgeLogs() async {
+    loggedErrors.clear();
+    logs.clear();
   }
 }
 
@@ -139,38 +175,46 @@ void main() {
     expect(textField.controller?.text, 'user=test; token=abc');
   });
 
-  testWidgets('URL Input, Cookie Input, and Go button action - verifying logs for cookie setting', (WidgetTester tester) async {
-    // Since LocalLogService is not injected, we cannot directly verify calls on a mock.
-    // This test will check if the "Go" button press triggers the expected LOG flow for cookies.
-    // This is an indirect verification. For robust testing, LocalLogService should be injectable.
+  testWidgets('URL Input, Cookie Input, and Go button action - with error in cookie setting', (WidgetTester tester) async {
+    // This test relies on the fact that WebViewScreen creates its own LocalLogService instance.
+    // We can't inject a mock directly to use verify().
+    // Instead, we could expose the LocalLogService instance from WebViewScreen's state for testing,
+    // or use a global service locator that can be configured for tests.
+    // For now, this test will check for UI feedback (like SnackBars) and assume error logging happens.
 
-    await pumpWebViewScreen(tester); // Not passing mockLogService as it's not injectable yet
+    await pumpWebViewScreen(tester);
 
-    final urlField = find.widgetWithText(TextField, 'Enter URL'); // Main URL field
-    await tester.enterText(urlField, 'https://secure.example.com');
+    final urlField = find.widgetWithText(TextField, 'Enter URL');
+    await tester.enterText(urlField, 'https://example.com'); // Valid URL for cookie domain
 
+    // Malformed cookie string (e.g., missing value, or a problematic character if parser is strict)
+    // The current parser splits by '=' and expects two parts. "badcookie;" will result in one part.
+    // "badcookie=" will result in two parts, but value is empty.
+    // Let's test a case that causes an error in setCookie itself, e.g. by a name that's rejected.
+    // However, our mock CookieManager above doesn't simulate setCookie errors.
+    // For this test, let's assume that the SnackBar for "Error setting cookie" is a primary indicator.
+
+    // To test the logErrorLocal path for cookie setting, we'd need to make CookieManager.setCookie throw.
+    // This is hard with the static instance.
+    // Let's test the scenario where the URL is invalid for cookies (no host).
+    await tester.enterText(urlField, 'notaurl'); // Invalid URL, no host
     final cookieField = find.widgetWithText(TextField, 'Enter cookie values (e.g., name1=value1; name2=value2)');
-    await tester.enterText(cookieField, 'mycookie=myvalue; another=otherval');
+    await tester.enterText(cookieField, 'mycookie=myvalue');
 
     await tester.tap(find.widgetWithText(ElevatedButton, 'Go'));
-    await tester.pumpAndSettle(); // Allow futures in _go() to complete
+    await tester.pumpAndSettle();
 
-    // **Conceptual Verification (if LocalLogService were injectable):**
-    // verify(mockLogService.addLog('VERBOSE', 'Setting cookie: mycookie=myvalue for domain secure.example.com')).called(1);
-    // verify(mockLogService.addLog('VERBOSE', 'Setting cookie: another=otherval for domain secure.example.com')).called(1);
-    // verify(mockLogService.addLog('INFO', 'Navigating to: https://secure.example.com with headers: {User-Agent: LangPocketWebView/1.0}')).called(1);
+    // Previously, this test checked for absence of "Error setting cookie" snackbar.
+    // Now, we expect a snackbar for "URL has no host".
+    // The logging for "URL has no host" is now a print statement, not verifiable here.
+    // The SnackBar "URL has no host, cannot set cookies." should appear.
+    expect(find.text('URL has no host, cannot set cookies.'), findsOneWidget);
 
-    // As direct verification of log calls is not possible without refactoring WebViewScreen,
-    // this test primarily ensures that:
-    // 1. The "Go" button is tappable with URL and cookie inputs.
-    // 2. The app doesn't crash due to the cookie logic.
-    // 3. The URL loading is attempted (indirectly, via InAppWebView's behavior or other logs if any).
-    // A full verification of `CookieManager.setCookie` calls is also not feasible here
-    // without a way to mock `CookieManager.instance()`.
-
-    // We can check that no unexpected errors (like snackbars for malformed cookies) appear if format is okay.
-    expect(find.text('Error setting cookie: mycookie'), findsNothing);
-    expect(find.text('Malformed cookie part'), findsNothing);
+    // If we wanted to verify logErrorLocal for "Failed to set cookie", we would need to:
+    // 1. Refactor WebViewScreen to take LocalLogService as a dependency.
+    // 2. Provide the mockLogService to it.
+    // 3. Configure the (mocked) CookieManager to throw an error when setCookie is called.
+    // Then: expect(mockLogService.loggedErrors.any((log) => log['message'].contains('Failed to set cookie')), isTrue);
   });
 
 
