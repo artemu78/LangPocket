@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:LangPocket/screens/error_logs_screen.dart'; // Assuming project name LangPocket
 import 'package:LangPocket/main.dart'; // Added import for MyHomePage
+import 'package:LangPocket/screens/web_view_screen.dart'; // Added import for WebViewScreen
 
 class MainAppScaffold extends StatelessWidget {
   final Widget body;
@@ -96,6 +97,14 @@ class MainAppScaffold extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => const ErrorLogsScreen()),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.web), // Icon for Web View
+              title: const Text('Web view'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(context, MaterialPageRoute(builder: (context) => WebViewScreen()));
               },
             ),
           ],
